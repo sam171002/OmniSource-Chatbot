@@ -1,19 +1,24 @@
 from __future__ import annotations
-
+import os
 import uuid
 from pathlib import Path
 from typing import List
-
 import chromadb
 from chromadb.config import Settings
-
+from chromadb.utils import embedding_functions
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "Data"
 CHROMA_DIR = BASE_DIR / "chroma_pdfs"
+
+
+def get_gemini_embedding_function():
+    return embedding_functions.GoogleGenerativeAiEmbeddingFunction(
+        api_key=os.getenv("GEMINI_API_KEY"),
+        model_name="gemini-embedding-001",
+    )
 
 
 def get_pdf_client():
@@ -30,7 +35,10 @@ PDF_COLLECTION_NAME = "pdf_docs"
 
 def get_pdf_collection():
     client = get_pdf_client()
-    return client.get_or_create_collection(PDF_COLLECTION_NAME)
+    return client.get_or_create_collection(
+        PDF_COLLECTION_NAME,
+        embedding_function=get_gemini_embedding_function(),
+    )
 
 
 def ingest_pdfs(pdf_paths: List[Path]) -> int:
@@ -44,12 +52,10 @@ def ingest_pdfs(pdf_paths: List[Path]) -> int:
         chunk_overlap=200,
     )
     total_chunks = 0
-
     for pdf_path in pdf_paths:
         loader = PyPDFLoader(str(pdf_path))
         pages = loader.load()
         docs = text_splitter.split_documents(pages)
-
         documents = [d.page_content for d in docs]
         metadatas = []
         ids = []
@@ -63,11 +69,9 @@ def ingest_pdfs(pdf_paths: List[Path]) -> int:
                 }
             )
             ids.append(str(uuid.uuid4()))
-
         if documents:
             collection.add(documents=documents, metadatas=metadatas, ids=ids)
             total_chunks += len(documents)
-
     return total_chunks
 
 
@@ -75,6 +79,3 @@ def pdf_semantic_search(query: str, k: int = 5):
     collection = get_pdf_collection()
     result = collection.query(query_texts=[query], n_results=k)
     return result
-
-
-
