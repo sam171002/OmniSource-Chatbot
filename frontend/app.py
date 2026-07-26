@@ -23,15 +23,34 @@ def render_chat():
 
     # Example questions to guide the user
     with st.expander("See example questions"):
-        st.markdown(
-            "- **Excel / CSV examples**:\n"
-            "  - What is the average price of all Smart Phone models sold by Bestbuy?\n"
-            "  - How many Laptop products are sold by Walmart?\n"
-            "  - What is the average review rating for Samsung TVs?\n\n"
-            "- **PDF examples**:\n"
-            "  - Summarize the key recommendations from the omnichannel strategy document.\n"
-            "  - What are the main challenges mentioned for social listening in large enterprises?"
-        )
+    st.markdown("""
+    - **PDF examples**:
+      - What are the key differences between the MR 5300 and MR 7700 systems?
+      - What are the gradient specifications for the MR 7700 system?
+      - What safety precautions are mentioned for helium gas in the MR 7700 document?
+      - What is the maximum sound pressure level in the examination room for the MR 5300?
+      - Summarize the electromagnetic compatibility requirements for Philips MRI systems.
+      - Describe the network and security features of the MR 7700 system.
+      - What are the RF system characteristics for the MR 7700 body coil?
+      - What are the spatial field gradient values for the MR 5300?
+      - What are the recommended separation distances for portable RF communications equipment?
+      - What messages appear when there are issues with the magnet?
+     
+    - **Excel / CSV examples**:
+      - What is the average price of all Smart Phone models sold by Bestbuy?
+      - How many Laptop products are sold by Walmart?
+      - What is the average review rating for Samsung TVs?
+      - Show me all reviews mentioning "overheating".
+      - What is the most common problem reported for Dell laptops?
+      - Which product has the highest review rating?
+      - How many positive reviews does the HP Pavilion laptop have?
+      - List all products from Target with a rating below 3.
+      - What is the average review rating for products sold by Frys?
+      - Which retailer has the most 5-star reviews?
+      - Show all reviews with negative sentiment for the Surface 3 tablet.
+      - How many reviews mention "battery" and what is the average rating?
+      - Show all products with a rating of 5 and a positive review.
+    """)
 
     # Render chat history
     for m in st.session_state["messages"]:
