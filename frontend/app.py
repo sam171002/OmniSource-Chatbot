@@ -176,3 +176,39 @@ def render_analytics():
     st.markdown("### Feedback Overview")
     fb_up = data["feedback_summary"].get("up", 0)
     fb_down = data["feedback_summary"].get("down", 0)
+    if fb_up == 0 and fb_down == 0:
+        st.write("No feedback provided yet.")
+    else:
+        fb_df = pd.DataFrame(
+            [
+                {"Feedback": "Helpful", "Count": fb_up},
+                {"Feedback": "Not helpful", "Count": fb_down},
+            ]
+        )
+        fb_chart = (
+            alt.Chart(fb_df)
+            .mark_bar()
+            .encode(
+                x=alt.X("Feedback", title="User feedback"),
+                y=alt.Y("Count", title="Number of responses"),
+                color=alt.Color("Feedback", legend=None),
+                tooltip=["Feedback", "Count"],
+            )
+            .properties(height=300)
+        )
+        st.altair_chart(fb_chart, use_container_width=True)
+
+
+def main():
+    st.set_page_config(page_title="OmniSource Chatbot")
+    st.title("Multi-Source Analytics Assistant")
+
+    tab_chat, tab_analytics = st.tabs(["Chat", "Analytics"])
+    with tab_chat:
+        render_chat()
+    with tab_analytics:
+        render_analytics()
+
+
+if __name__ == "__main__":
+    main()
