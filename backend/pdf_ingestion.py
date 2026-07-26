@@ -5,7 +5,8 @@ from pathlib import Path
 from typing import List
 import chromadb
 from chromadb.config import Settings
-from chromadb.utils import embedding_functions
+from chromadb.api.types import Documents, EmbeddingFunction
+import google.generativeai as genai
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
@@ -14,11 +15,25 @@ DATA_DIR = BASE_DIR / "Data"
 CHROMA_DIR = BASE_DIR / "chroma_pdfs"
 
 
+class GeminiEmbeddingFunction(EmbeddingFunction):
+    """Calls Gemini's embedding API directly, bypassing chromadb's built-in
+    Google wrapper (which has a version-compatibility bug)."""
+
+    def __init__(self, api_key: str, model_name: str = "models/gemini-embedding-001"):
+        genai.configure(api_key=api_key)
+        self.model_name = model_name
+
+    def __call__(self, input: Documents):
+        response = genai.embed_content(
+            model=self.model_name,
+            content=list(input),
+            task_type="RETRIEVAL_DOCUMENT",
+        )
+        return response["embedding"]
+
+
 def get_gemini_embedding_function():
-    return embedding_functions.GoogleGenerativeAiEmbeddingFunction(
-        api_key=os.getenv("GEMINI_API_KEY"),
-        model_name="gemini-embedding-001",
-    )
+    return GeminiEmbeddingFunction(api_key=os.getenv("GEMINI_API_KEY"))
 
 
 def get_pdf_client():
