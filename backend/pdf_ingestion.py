@@ -1,5 +1,6 @@
 from __future__ import annotations
 import os
+import time
 import uuid
 from pathlib import Path
 from typing import List
@@ -7,6 +8,7 @@ import chromadb
 from chromadb.config import Settings
 from chromadb.api.types import Documents, EmbeddingFunction
 import google.generativeai as genai
+from google.api_core.exceptions import ResourceExhausted
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
@@ -16,9 +18,6 @@ CHROMA_DIR = BASE_DIR / "chroma_pdfs"
 
 
 class GeminiEmbeddingFunction(EmbeddingFunction):
-    """Calls Gemini's embedding API directly, bypassing chromadb's built-in
-    Google wrapper (which has a version-compatibility bug)."""
-
     def __init__(self, api_key: str, model_name: str = "models/gemini-embedding-001"):
         genai.configure(api_key=api_key)
         self.model_name = model_name
@@ -56,6 +55,18 @@ def get_pdf_collection():
     )
 
 
+def _add_batch_with_retry(collection, documents, metadatas, ids, max_retries=5):
+    for attempt in range(max_retries):
+        try:
+            collection.add(documents=documents, metadatas=metadatas, ids=ids)
+            return
+        except ResourceExhausted:
+            wait = 20 * (attempt + 1)
+            time.sleep(wait)
+    # last attempt, let it raise if it still fails
+    collection.add(documents=documents, metadatas=metadatas, ids=ids)
+
+
 def ingest_pdfs(pdf_paths: List[Path]) -> int:
     """
     Ingest PDFs into dedicated Chroma collection.
@@ -66,6 +77,7 @@ def ingest_pdfs(pdf_paths: List[Path]) -> int:
         chunk_size=1200,
         chunk_overlap=200,
     )
+    BATCH_SIZE = 50
     total_chunks = 0
     for pdf_path in pdf_paths:
         loader = PyPDFLoader(str(pdf_path))
@@ -84,9 +96,17 @@ def ingest_pdfs(pdf_paths: List[Path]) -> int:
                 }
             )
             ids.append(str(uuid.uuid4()))
-        if documents:
-            collection.add(documents=documents, metadatas=metadatas, ids=ids)
-            total_chunks += len(documents)
+
+        for i in range(0, len(documents), BATCH_SIZE):
+            batch_docs = documents[i:i + BATCH_SIZE]
+            if not batch_docs:
+                continue
+            batch_meta = metadatas[i:i + BATCH_SIZE]
+            batch_ids = ids[i:i + BATCH_SIZE]
+            _add_batch_with_retry(collection, batch_docs, batch_meta, batch_ids)
+            total_chunks += len(batch_docs)
+            time.sleep(2)  # pace requests to stay under the free-tier rate limit
+
     return total_chunks
 
 
