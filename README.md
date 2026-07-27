@@ -1,12 +1,13 @@
 # OmniSource Chatbot 
-URL: https://omnisource-frontend.onrender.com/
-> [!NOTE]
-> This is hosted on a free tier, The backend may be asleep if it hasn't been used recently. It may  **take 3-4 minutes**  while it spins back up. This is expected, not a bug. Subsequent messages will  work nomrally and fast.
 
 ![Python Version](https://img.shields.io/badge/python-3.9%2B-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-009688)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.25%2B-FF4B4B)
 ![LangGraph](https://img.shields.io/badge/LangGraph-Agentic-orange)
+
+URL: https://omnisource-frontend.onrender.com/
+> [!NOTE]
+> This is hosted on a free tier, The backend may be asleep if it hasn't been used recently. It may  **take 3-4 minutes**  while it spins back up. This is expected, not a bug. Subsequent messages will  work nomrally and fast.
 <img width="1023" height="791" alt="architecture" src="https://github.com/user-attachments/assets/bd13daff-8f7a-40d2-8a11-3b434b642590" />
 
 **OmniSource** is an intelligent, multi-source chatbot designed to bridge the gap between unstructured data (PDF documents) and structured data (Excel/CSV spreadsheets). 
