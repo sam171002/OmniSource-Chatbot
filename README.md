@@ -1,5 +1,7 @@
 # OmniSource Chatbot 
 URL: https://omnisource-frontend.onrender.com/
+> [!NOTE]
+> This is hosted on a free tier, The backend may be asleep if it hasn't been used recently. It may  **take 3-4 minutes**  while it spins back up. This is expected, not a bug. Subsequent messages will  work nomrally and fast.
 
 ![Python Version](https://img.shields.io/badge/python-3.9%2B-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-009688)
